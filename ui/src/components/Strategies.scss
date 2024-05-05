@@ -1,0 +1,21 @@
+.strategies {
+    width: 100%;
+    padding: 0 100px;
+    box-sizing: border-box;
+    background-color: var(--background-color-darker); // light grey background
+
+    .strategies-control {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 30px 100px;
+        margin: 20px 0;
+        color: var(--text-color-primary); 
+        background-color: var(--background-color-light);
+    }
+
+    .strategies-result {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 20px;
+    }
+}

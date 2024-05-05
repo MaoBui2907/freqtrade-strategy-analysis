@@ -5,3 +5,6 @@ rm -rf ../../ft_userdata/user_data/strategies/*
 find . -name "*.py" -exec cp {} ../../ft_userdata/user_data/strategies/ \;
 cd ../../
 rm -rf freqtrade-strategies
+cd ft_userdata
+pipenv run python fetch_strategies.py
+cd ../

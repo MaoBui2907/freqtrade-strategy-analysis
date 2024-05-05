@@ -1,0 +1,7 @@
+
+fastapi
+langchain
+langchain-anthropic
+pymongo
+tqdm
+uvicorn

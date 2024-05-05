@@ -21,6 +21,15 @@
             "program": "backtesting.py",
             "console": "internalConsole",
             "justMyCode": false
+        },
+        {
+            "name": "Python run process_backtesting.py",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/ft_userdata",
+            "program": "process_backtesting.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

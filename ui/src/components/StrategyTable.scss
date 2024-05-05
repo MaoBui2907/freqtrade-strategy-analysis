@@ -1,0 +1,10 @@
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: row;
+  margin-bottom: 1rem;
+  
+  button {
+    display: flex;
+  }
+}
