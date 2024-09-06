@@ -19,7 +19,7 @@ class Backtesting:
     end_date: str
     pair_group_id: str
     strategies: list[str]
-    status: str  # 'pending', 'running', 'completed', 'failed'
+    status: str  # 'pending', 'processing', 'completed', 'failed'
     performances: list[str] = None
 
 @dataclass

@@ -10,6 +10,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import PairGroups from "./components/PairGroups";
 import StrategyDetail from "./components/StrategyDetail";
 import Helper from "./components/Helper";
+import StrategyGroups from "./components/StrategyGroups";
 
 function App() {
   const darkTheme = createTheme({
@@ -28,6 +29,7 @@ function App() {
               <Route path="/" element={<Navigate to="/strategies" />} />
               <Route path="/strategies" element={<Strategies />} />
               <Route path="/strategies/:strategyId" element={<StrategyDetail />} />
+              <Route path="/strategy-groups" element={<StrategyGroups />} />
               <Route path="/pair-groups" element={<PairGroups />} />
               <Route path="/backtesting" element={<Backtesting />} />
               <Route path="/helper" element={<Helper />} />

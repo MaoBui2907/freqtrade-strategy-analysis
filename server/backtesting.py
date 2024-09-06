@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from db import get_db
 from schemas import BacktestingRequest
 import services as serv
+from celery_service import start_backtesting_batch
 
 
 router = APIRouter()
@@ -20,5 +21,7 @@ def get_backtesting_performance(id: str,db=Depends(get_db)):
 
 @router.post("")
 def create_backtesting(backtesting: BacktestingRequest, db=Depends(get_db)):
-    res = serv.create_backtesting(db, backtesting)
+    res = serv.create_backtesting(db, backtesting.model_dump())
+    if res:
+        start_backtesting_batch.delay(str(res))
     return res

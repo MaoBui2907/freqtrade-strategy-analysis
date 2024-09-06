@@ -10,10 +10,11 @@ function Header() {
     <div className="header">
         <img src={iconImage} className="header-icon" alt="icon" />
         <Link className={`header-item ${location.pathname.startsWith('/strategies') ? 'active' : ''}`} to="/strategies">Strategies</Link>
+        <Link className={`header-item ${location.pathname.startsWith('/strategy-groups') ? 'active' : ''}`} to="/strategy-groups">Strategy Groups</Link>
         <Link className={`header-item ${location.pathname.startsWith('/pair-groups') ? 'active' : ''}`} to="/pair-groups">Pair Groups</Link>
         <Link className={`header-item ${location.pathname.startsWith('/backtesting') ? 'active' : ''}`} to="/backtesting">Backtesting</Link>
         <Link className={`header-item ${location.pathname.startsWith('/helper') ? 'active' : ''}`} to="/helper">Helper</Link>
-        <a className="header-item no-border end" href="https://maobui.online" target="_blank" rel="noreferrer">
+        <a className="header-item no-border end" href="https://maobui.com" target="_blank" rel="noreferrer">
           <FaExternalLinkAlt />
         </a>
     </div>

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backtesting import router as backtesting_router
 from pairs import router as pair_groups_router
 from strategies import router as strategies_router
-
+from strategy_groups import router as strategy_groups_router
 
 app = FastAPI(
     debug=True,
@@ -23,6 +23,7 @@ app.add_middleware(
 app.include_router(backtesting_router, prefix="/backtestings", tags=["backtestings"])
 app.include_router(pair_groups_router, prefix="/pair-groups", tags=["pair groups"])
 app.include_router(strategies_router, prefix="/strategies", tags=["strategies"])
+app.include_router(strategy_groups_router, prefix="/strategy-groups", tags=["strategy groups"])
 
 @app.get("/")
 async def root():

@@ -27,7 +27,7 @@ class Backtesting:
     end_date: str
     pair_group_id: str
     strategies: list[str]
-    status: str  # 'pending', 'running', 'completed', 'failed'
+    status: str  # 'pending', 'processing', 'completed', 'failed'
     performances: list[str] = None
 
 @dataclass
@@ -86,7 +86,7 @@ class DBService:
     def get_pending_backtestings_to_process(self):
         return self.db.get_collection("backtestings").find({"status": "pending"})
 
-    def update_backtesting_status(self, backtesting_id: str, status: 'pending' or 'running' or 'completed' or 'failed' = 'pending'):  # type: ignore # noqa: F821
+    def update_backtesting_status(self, backtesting_id: str, status: 'pending' or 'processing' or 'completed' or 'failed' = 'pending'):  # type: ignore # noqa: F821
         return self.db.get_collection("backtestings").update_one(
             {"_id": ObjectId(backtesting_id)}, {"$set": {"status": status}}
         )

@@ -30,8 +30,9 @@ class BacktestingRequest(BaseModel):
     name: str
     start_date: str
     end_date: str
+    timeframe: str
     pair_group_id: str
-    strategies: list[str]
+    strategy_group_id: str
 
 
 class BacktestingResponse(BaseModel):

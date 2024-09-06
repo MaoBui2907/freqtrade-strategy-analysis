@@ -4,9 +4,9 @@ version: '3.7'
 
 
 services:
-  db:
+  mongo-db:
     image: mongo:5.0.26
-    container_name: mongo
+    container_name: mongo-db 
     restart: always
     volumes:
       - ./db:/data/db
@@ -14,43 +14,52 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASS}
     ports:
-      - "27017:27017"
+      - "9899:27017"
 
-  mongo-express:
-    image: mongo-express:1.0.2
-    container_name: mongo-express
-    restart: always
-    environment:
-      ME_CONFIG_MONGODB_SERVER: db
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGODB_USER}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGODB_PASS}
-    ports:
-      - "9898:8081"
-    depends_on:
-      - db
+  # backend:
+  #   build:
+  #     context: ./server
+  #     dockerfile: Dockerfile
+  #   container_name: backend
+  #   restart: always
+  #   environment:
+  #     - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
+  #     - MONGO_DB_NAME=${MONGO_DB_NAME}
+  #     - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+  #   ports:
+  #     - "1998:80"
+  #   depends_on:
+  #     - mongo-db
 
-  backend:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: backend
-    restart: always
-    environment:
-      - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
-      - MONGO_DB_NAME=${MONGO_DB_NAME}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-    ports:
-      - "1998:80"
-    depends_on:
-      - db
+  # frontend:
+  #   build:
+  #     context: ./ui
+  #     dockerfile: Dockerfile
+  #   container_name: frontend
+  #   restart: always
+  #   ports:
+  #     - "3001:80"
+  #   depends_on:
+  #     - backend
 
-  frontend:
-    build:
-      context: ./ui
-      dockerfile: Dockerfile
-    container_name: frontend
+  redis:
+    image: redis:6.2.6
+    container_name: redis
     restart: always
     ports:
-      - "3001:80"
-    depends_on:
-      - backend
+      - "3002:6379"
+
+  # celery:
+  #   build:
+  #     context: ./server
+  #     dockerfile: Dockerfile
+  #   container_name: celery
+  #   restart: always
+  #   environment:
+  #     - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
+  #     - MONGO_DB_NAME=${MONGO_DB_NAME}
+  #     - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+  #     - REDIS_URL=redis://redis:3002/0
+  #   depends_on:
+  #     - redis
+  #     - mongo-db

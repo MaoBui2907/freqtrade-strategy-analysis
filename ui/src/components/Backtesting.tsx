@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import {
   BacktestingData,
   PairGroupData,
-  StrategyData,
+  StrategyGroupData,
+  Timeframe,
 } from "../types/Backtesting";
 import {
   getBacktestings,
   getPairGroups,
-  getStrategies,
   createBacktesting,
+  getStrategyGroups,
 } from "../services/ApiService";
 import {
   TextField,
@@ -21,24 +22,24 @@ import {
   FormControl,
   InputLabel,
   Dialog,
-  Checkbox,
+  Box,
+  Chip,
+  MenuItem,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import "./Backtesting.scss";
 import StrategyPerformanceTable from "./StrategyPerformanceTable";
 import { FaPlus } from "react-icons/fa";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import { format } from "date-fns";
 
 function EditBactestingDialog({
   pairGroups,
-  strategies,
+  strategyGroups,
   onSave,
   onCancel,
 }: {
   pairGroups: PairGroupData[];
-  strategies: StrategyData[];
+  strategyGroups: StrategyGroupData[];
   onSave: (data: any) => void;
   onCancel: () => void;
 }) {
@@ -46,16 +47,44 @@ function EditBactestingDialog({
     uid: item.uid,
     name: item.name,
   }));
-  const strategyOptions = strategies.map((item) => ({
+  const strategyGroupOptions = strategyGroups.map((item) => ({
     uid: item.uid,
-    name: item.name,
+    name: item.name
   }));
-  const [backtesting, setBacktesting] = useState<any>({
+  const timeframeOptions = [{
+    uid: Timeframe.M1,
+    name: "1 Minute"
+  }, {
+    uid: Timeframe.M5,
+    name: "5 Minutes"
+  }, {
+    uid: Timeframe.M15,
+    name: "15 Minutes"
+  }, {
+    uid: Timeframe.M30,
+    name: "30 Minutes"
+  }, {
+    uid: Timeframe.H1,
+    name: "1 Hour"
+  }, {
+    uid: Timeframe.H4,
+    name: "4 Hours"
+  }, {
+    uid: Timeframe.H8,
+    name: "8 Hours"
+  }, {
+    uid: Timeframe.D1,
+    name: "1 Day"
+  }];
+  const [backtesting, setBacktesting] = useState<BacktestingData>({
+    uid: "",
     name: "",
     pairGroup: "",
     startDate: new Date(),
+    status: "pending",
     endDate: new Date(),
-    strategies: [] as string[],
+    strategyGroup: "",
+    timeframe: Timeframe.M5,
   });
   const isBacktestingValid = () => {
     return (
@@ -63,7 +92,7 @@ function EditBactestingDialog({
       backtesting.pairGroup &&
       backtesting.startDate &&
       backtesting.endDate &&
-      backtesting.strategies.length > 0
+      backtesting.strategyGroup
     );
   };
 
@@ -113,6 +142,50 @@ function EditBactestingDialog({
               )}
             />
           </Grid>
+          <Grid item xs={4}>
+            <Autocomplete
+              size="small"
+              style={{ width: "100%" }}
+              options={timeframeOptions}
+              getOptionLabel={(option) => option.name}
+              value={
+                timeframeOptions.find(
+                  (item) => item.uid === backtesting.timeframe
+                ) || null
+              }
+              onChange={(event, newValue) => {
+                setBacktesting({
+                  ...backtesting,
+                  timeframe: newValue?.uid || Timeframe.M5,
+                });
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Timeframe" required />
+              )}
+            />
+          </Grid>
+          <Grid item xs={8}>
+              <Autocomplete 
+                size="small"
+                style={{ width: "100%" }}
+                options={strategyGroupOptions}
+                getOptionLabel={(option) => option.name}
+                value={
+                  strategyGroupOptions.find(
+                    (item) => item.uid === backtesting.strategyGroup
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setBacktesting({
+                    ...backtesting,
+                    strategyGroup: newValue?.uid || ''
+                  })
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Strategy Group" required />
+                )}
+              />
+          </Grid>
           <Grid item xs={6}>
             <DatePicker
               label="Start Date"
@@ -122,7 +195,7 @@ function EditBactestingDialog({
               onChange={(date) => {
                 setBacktesting({
                   ...backtesting,
-                  startDate: date?.toISOString() || "",
+                  startDate: date || new Date(),
                 });
               }}
               value={backtesting.startDate}
@@ -137,51 +210,10 @@ function EditBactestingDialog({
               onChange={(date) => {
                 setBacktesting({
                   ...backtesting,
-                  endDate: date?.toISOString() || "",
+                  endDate: date || new Date(),
                 });
               }}
               value={backtesting.endDate}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Autocomplete
-              multiple
-              size="small"
-              style={{ width: "100%" }}
-              options={strategyOptions}
-              getOptionLabel={(option) => option.name}
-              value={
-                strategyOptions.filter((item: any) =>
-                  backtesting.strategies.includes(item.uid)
-                ) || []
-              }
-              onChange={(event, newValue) => {
-                setBacktesting({
-                  ...backtesting,
-                  strategies: newValue.map((item: any) => item.uid),
-                });
-              }}
-              renderOption={(prop, option, { selected }) => {
-                return (
-                  <li {...prop}>
-                    <Checkbox
-                      icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                      checkedIcon={<CheckBoxIcon fontSize="small" />}
-                      style={{ marginRight: 8 }}
-                      checked={selected}
-                    />
-                    {option.name}
-                  </li>
-                );
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Strategies"
-                  placeholder="Type..."
-                  required
-                />
-              )}
             />
           </Grid>
         </Grid>
@@ -205,7 +237,7 @@ function EditBactestingDialog({
               color="primary"
               size="small"
               onClick={() => onSave(backtesting)}
-              disabled={ true || !isBacktestingValid() }
+              disabled={ !isBacktestingValid() }
             >
               Save
             </Button>
@@ -221,23 +253,41 @@ function Backtesting() {
   const [selectedBacktesting, setSelectedBacktesting] =
     useState<BacktestingData | null>(null);
   const [pairGroups, setPairGroups] = useState<PairGroupData[]>([]);
-  const [strategies, setStrategies] = useState<StrategyData[]>([]);
+  const [strategyGroups, setStrategyGroups] = useState<StrategyGroupData[]>([])
 
   useEffect(() => {
     getBacktestings().then((data) => setData(data));
     getPairGroups().then((data) => setPairGroups(data));
-    getStrategies().then((data) => setStrategies(data));
+    getStrategyGroups().then((data) => setStrategyGroups(data))
   }, []);
 
   const backtestingOptions = data.map((item) => ({
     uid: item.uid,
-    name: `${item.name} (${format(new Date(item.startDate), 'dd-MM-yyyy')} - ${format(new Date(item.endDate), 'dd-MM-yyyy')})`,
+    name: `${item.name}`,
+    status: item.status,
+    timeRange: `${format(new Date(item.startDate), 'dd/MM/yy')} - ${format(new Date(item.endDate), 'dd/MM/yy')}`,
   }));
+
+  console.log(backtestingOptions);
 
   const pairGroupOptions = pairGroups.map((item) => ({
     uid: item.uid,
     name: item.name,
   }));
+
+  const statusColors: { [key: string]: string } = {
+    "pending": "warning",
+    "processing": "info",
+    "completed": "success",
+    "failed": "error",
+  }
+
+  const statusOptions = [
+    { uid: "pending", name: "Pending" },
+    { uid: "processing", name: "Processing" },
+    { uid: "completed", name: "Completed" },
+    { uid: "failed", name: "Failed" },
+  ]
 
   const startDate = selectedBacktesting?.startDate
     ? new Date(selectedBacktesting.startDate)
@@ -256,16 +306,20 @@ function Backtesting() {
     setOpen(false);
   };
 
-  const handleClickSaveBacktesting = async (data: any) => {
-    await createBacktesting(data, data.strategies);
-    setOpen(false);
+  const handleClickSaveBacktesting = (data: BacktestingData) => {
+    createBacktesting(data).then(() => {
+      getBacktestings().then((data) => {
+        setData(data)
+        setOpen(false)
+      });
+    });
   };
 
   return (
     <div className="backtesting">
       <Dialog open={open} onClose={handleClickCloseAddBacktesting}>
         <EditBactestingDialog
-          strategies={strategies}
+          strategyGroups={strategyGroups}
           pairGroups={pairGroups}
           onCancel={handleClickCloseAddBacktesting}
           onSave={handleClickSaveBacktesting}
@@ -273,13 +327,13 @@ function Backtesting() {
       </Dialog>
       <Card className="backtesting-control">
         <Grid container spacing={2} alignItems="top">
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <Autocomplete
               size="small"
               style={{ width: "100%" }}
               id="backtesting-select"
               options={backtestingOptions}
-              getOptionLabel={(option) => option.name}
+              getOptionLabel={(option) => (option.name)}
               onChange={(event, newValue) => {
                 const selectedOption = data.find(
                   (item) => item.uid === newValue?.uid
@@ -289,9 +343,53 @@ function Backtesting() {
               renderInput={(params) => (
                 <TextField {...params} label="Backtesting" />
               )}
+              renderOption={(props, option) => {
+                return (<Box
+                  key={option.uid}
+                  component="li"
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    overflow: 'hidden',
+                    maxHeight: '40px',
+                    maxWidth: '500px',
+                  }}
+                  {...props}
+                >
+                  <Box sx={{flexGrow: 1, marginRight: '4px'}}>
+                    {option.name} ({option.timeRange})
+                  </Box> &nbsp;
+                  <Chip key={option.uid} size='small' sx={{ fontSize: '0.8rem' }} variant="outlined" label={option.status} color={statusColors[option.status] as any} />
+                </Box>)
+              }}
+              componentsProps={{
+                popper: {
+                  style: {
+                    width: "fit-content",
+                  }
+                }
+              }}
             />
           </Grid>
-          <Grid item xs={2.25}>
+          <Grid item xs={1}>
+              <Button
+                color={statusColors[selectedBacktesting?.status || "pending"] as any}
+                sx={{
+                  ':hover': {
+                    backgroundColor: 'transparent',
+                  },
+                  ':focus': {
+                    backgroundColor: 'transparent',
+                  }, 
+                  paddingTop: '10px',
+                  paddingLeft: '0px',
+                }}
+              >
+                {selectedBacktesting?.status || "Status"}
+              </Button>
+          </Grid>
+          <Grid item xs={1.75}>
             <DatePicker
               label="Start Date"
               value={startDate as null | undefined}
@@ -300,7 +398,7 @@ function Backtesting() {
               disabled
             />
           </Grid>
-          <Grid item xs={2.25}>
+          <Grid item xs={1.75}>
             <DatePicker
               label="End Date"
               value={endDate as null | undefined}
@@ -309,7 +407,28 @@ function Backtesting() {
               disabled
             />
           </Grid>
-          <Grid item xs={2}>
+          
+          <Grid item xs={1.75}>
+            <FormControl fullWidth>
+              <InputLabel id="strategy-group-label">Strategy Group</InputLabel>
+              <Select
+                labelId="strategy-group-label"
+                size="small"
+                label="Strategy Group"
+                value={selectedBacktesting?.strategyGroup || ""}
+                onChange={(event) => {}}
+                disabled
+              >
+                {strategyGroups.map((option) => (
+                  <option key={option.uid} value={option.uid}>
+                    {option.name}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={1.75}>
             <FormControl fullWidth>
               <InputLabel id="pair-group-label">Pair Group</InputLabel>
               <Select
@@ -328,7 +447,7 @@ function Backtesting() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={1.5}>
+          <Grid item xs={1}>
             <Button
               variant="outlined"
               color="primary"

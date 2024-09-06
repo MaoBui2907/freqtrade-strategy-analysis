@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PairGroupData } from "../types/Backtesting";
+import { StrategyGroupData } from "../types/Backtesting";
 import {
   Table,
   TableBody,
@@ -13,7 +13,7 @@ import {
   IconButton,
   Chip,
 } from "@mui/material";
-import { FaCheckDouble, FaStar, FaTrash } from "react-icons/fa";
+import { FaCheckDouble, FaPencilAlt, FaStar, FaTrash } from "react-icons/fa";
 import "./StrategyTable.scss";
 
 type SortDirection = "asc" | "desc";
@@ -21,15 +21,15 @@ type SortDirection = "asc" | "desc";
 interface Header {
   name: string;
   align: "left" | "right";
-  accessor?: keyof PairGroupData;
+  accessor?: keyof StrategyGroupData;
   width: string;
   suffix?: string;
 }
 
-function PairGroupTable({ pairGroups, handleDeleteGroup }: { pairGroups: PairGroupData[], handleDeleteGroup: (uid: string) =>  Promise<any>}) {
+function StrategyGroupTable({ strategyGroups, handleDeleteGroup, handleEditGroup }: { strategyGroups: StrategyGroupData[], handleDeleteGroup: (uid: string) =>  Promise<any>, handleEditGroup: (uid: string) =>  Promise<any> }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortField, setSortField] = useState<keyof PairGroupData | "">("");
+  const [sortField, setSortField] = useState<keyof StrategyGroupData | "">("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [isPerformingAction, setIsPerformingAction] = useState(false);
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -43,7 +43,7 @@ function PairGroupTable({ pairGroups, handleDeleteGroup }: { pairGroups: PairGro
     setPage(0);
   };
 
-  const handleSort = (field: keyof PairGroupData) => {
+  const handleSort = (field: keyof StrategyGroupData) => {
     const isAsc = sortField === field && sortDirection === "asc";
     setSortField(field);
     setSortDirection(isAsc ? "desc" : "asc");
@@ -54,7 +54,12 @@ function PairGroupTable({ pairGroups, handleDeleteGroup }: { pairGroups: PairGro
     handleDeleteGroup(uid).then(() => {setIsPerformingAction(false);});
   };
 
-  const sortedData = [...pairGroups].sort((a, b) => {
+  const handleEditGroupButton = (uid: string) => {
+    setIsPerformingAction(true);
+    handleEditGroup(uid).then(() => {setIsPerformingAction(false);});
+  }
+
+  const sortedData = [...strategyGroups].sort((a, b) => {
     if (sortField) {
       if (a[sortField] < b[sortField]) {
         return sortDirection === "asc" ? -1 : 1;
@@ -76,8 +81,8 @@ function PairGroupTable({ pairGroups, handleDeleteGroup }: { pairGroups: PairGro
     {
       name: "Pairs",
       align: "left",
-      accessor: "pairs",
-      width: "500px",
+      accessor: "strategies",
+      width: "700px",
     },
     {
       name: "Description",
@@ -110,7 +115,7 @@ function PairGroupTable({ pairGroups, handleDeleteGroup }: { pairGroups: PairGro
                         sortField === header.accessor ? sortDirection : "asc"
                       }
                       onClick={() =>
-                        handleSort(header.accessor! as keyof PairGroupData)
+                        handleSort(header.accessor! as keyof StrategyGroupData)
                       }
                     >
                       {header.name}
@@ -144,22 +149,22 @@ function PairGroupTable({ pairGroups, handleDeleteGroup }: { pairGroups: PairGro
                   >
                     { header.name === "Actions" ? (
                       <div className="action-buttons">
-                        <IconButton title="Favorite" disabled={true || isPerformingAction} size="small" color="info">
-                          <FaStar />
-                        </IconButton>
                         <IconButton title="Backtesting" disabled={true || isPerformingAction} size="small" color="primary">
                           <FaCheckDouble />
                         </IconButton>
-                        <IconButton title="Delete" disabled={isPerformingAction} size="small" color="error" onClick={() => handleDeleteGroupButton(row.uid)}>
+                        <IconButton title="Edit" disabled={ isPerformingAction } size="small" color="warning" onClick={() => handleEditGroupButton(row.uid)}>
+                          <FaPencilAlt />
+                        </IconButton>
+                        <IconButton title="Delete" disabled={ isPerformingAction } size="small" color="error" onClick={() => handleDeleteGroupButton(row.uid)}>
                           <FaTrash />
                         </IconButton>
                       </div>
-                    ) : (header.accessor === 'pairs' ? (
-                      (row[header.accessor as keyof PairGroupData] as string[]).map((pair, index) => (
+                    ) : (header.accessor === 'strategies' ? (
+                      (row[header.accessor as keyof StrategyGroupData] as string[]).map((pair, index) => (
                         <Chip key={index} label={pair} variant="outlined" size="small" style={{margin: '2px'}} />
                       ))
                     ) : (
-                      ` ${row[header.accessor! as keyof PairGroupData] || ''} ${ header.suffix || "" }`
+                      ` ${row[header.accessor! as keyof StrategyGroupData] || ''} ${ header.suffix || "" }`
                     ))}
                   </TableCell>
                 ))}
@@ -171,7 +176,7 @@ function PairGroupTable({ pairGroups, handleDeleteGroup }: { pairGroups: PairGro
       <TablePagination
         rowsPerPageOptions={[10, 25, 100, { label: "All", value: -1 }]}
         component="div"
-        count={pairGroups.length}
+        count={strategyGroups.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
@@ -181,4 +186,4 @@ function PairGroupTable({ pairGroups, handleDeleteGroup }: { pairGroups: PairGro
   );
 }
 
-export default PairGroupTable;
+export default StrategyGroupTable;

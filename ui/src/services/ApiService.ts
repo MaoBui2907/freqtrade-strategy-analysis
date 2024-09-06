@@ -1,4 +1,4 @@
-import { BacktestingData, PairData, PairGroupData, StrategyData, StrategyDetailData, StrategyPerformance } from "../types/Backtesting";
+import { BacktestingData, PairData, PairGroupData, StrategyData, StrategyDetailData, StrategyGroupData, StrategyPerformance } from "../types/Backtesting";
 
 const API_ROOT = 'http://localhost:1998';
 
@@ -10,7 +10,10 @@ export function getBacktestings(): Promise<BacktestingData[]> {
             name: item.name,
             startDate: item.start_date,
             endDate: item.end_date,
+            timeframe: item.timeframe,
+            strategyGroup: item.strategy_group_id,
             pairGroup: item.pair_group_id,
+            status: item.status,
         } as BacktestingData)));
 }
 
@@ -53,7 +56,7 @@ export function getStrategies(): Promise<StrategyData[]> {
         } as StrategyData)));
 }
 
-export function createBacktesting(data: BacktestingData, strategies: string[]): Promise<void> {
+export function createBacktesting(data: BacktestingData): Promise<void> {
     return fetch(`${API_ROOT}/backtestings`, {
         method: 'POST',
         headers: {
@@ -63,7 +66,8 @@ export function createBacktesting(data: BacktestingData, strategies: string[]): 
             name: data.name,
             start_date: data.startDate,
             end_date: data.endDate,
-            strategies: strategies,
+            timeframe: data.timeframe,
+            strategy_group_id: data.strategyGroup,
             pair_group_id: data.pairGroup,
         }),
     }).then(response => response.json());   
@@ -93,6 +97,51 @@ export function createPairGroup(data: PairGroupData): Promise<void> {
     }).then(response => response.json());
 }
 
+export function getStrategyGroups(): Promise<StrategyGroupData[]> {
+    return fetch(`${API_ROOT}/strategy-groups`)
+        .then(response => response.json())
+        .then(response => response?.map((item: any) => ({
+            uid: item.id,
+            name: item.name,
+            description: item.description,
+            strategies: item.strategies,
+        } as StrategyGroupData)));
+}
+
+export function createStrategyGroup(data: StrategyGroupData): Promise<void> {
+    return fetch(`${API_ROOT}/strategy-groups`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: data.name,
+            description: data.description,
+            strategies: data.strategies,
+        }),
+    }).then(response => response.json());
+}
+
+export function updateStrategyGroup(uid: string, data: StrategyGroupData): Promise<void> {
+    return fetch(`${API_ROOT}/strategy-groups/${uid}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: data.name,
+            description: data.description,
+            strategies: data.strategies,
+        }),
+    }).then(response => response.json());
+}
+
+
+export function deleteStrategyGroup(uid: string): Promise<void> {
+    return fetch(`${API_ROOT}/strategy-groups/${uid}`, {
+        method: 'DELETE',
+    }).then(response => response.json());
+}
 
 export function deletePairGroup(uid: string): Promise<void> {
     return fetch(`${API_ROOT}/pair-groups/${uid}`, {

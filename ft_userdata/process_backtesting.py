@@ -124,7 +124,7 @@ class ProcessBacktestingService:
 
 async def process_backtesting(db: DBService, backtesting):
     try: 
-        db.update_backtesting_status(str(backtesting.get('_id')), "running")
+        db.update_backtesting_status(str(backtesting.get('_id')), "processing")
         pairgroup = db.get_pair_group(str(backtesting.get('pair_group_id')))
         pairlist = pairgroup.get('pairs', [])
 

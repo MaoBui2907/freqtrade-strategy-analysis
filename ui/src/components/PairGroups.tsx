@@ -160,7 +160,6 @@ function PairGroups() {
                 height: '40px',
                 transform: 'none'
               }} 
-              disabled
               onClick={() => setOpen(true)}
               size="small"
               startIcon={<FaPlus />} 
