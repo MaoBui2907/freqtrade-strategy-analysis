@@ -1,10 +1,26 @@
-git clone -b migrate-2024 git@github.com:MaoBui2907/freqtrade-strategies.git freqtrade-strategies
-cd freqtrade-strategies/strategies
-rm -rf ../../ft_userdata/user_data/strategies/*
-# copy all strategies recursively end with .py
-find . -name "*.py" -exec cp {} ../../ft_userdata/user_data/strategies/ \;
-cd ../../
-rm -rf freqtrade-strategies
-cd ft_userdata
-pipenv run python fetch_strategies.py
-cd ../
+#!/bin/bash
+
+# Freqtrade Strategies Fetcher Script
+# Fetches trading strategies from GitHub repository and inserts into database
+
+echo "=== Freqtrade Strategies Fetcher ==="
+echo "Starting strategies fetch process..."
+
+# Change to server directory
+cd server
+
+# Activate virtual environment if it exists
+if [ -d "venv" ]; then
+    echo "Activating virtual environment..."
+    source venv/bin/activate
+fi
+
+# Install required dependencies if needed
+echo "Checking dependencies..."
+pip install requests pymongo python-dotenv
+
+# Run the fetch script
+echo "Running strategies fetch script..."
+python fetch_strategies_from_github.py
+
+echo "Strategies fetch process completed!"

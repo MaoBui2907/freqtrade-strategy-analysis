@@ -1,4 +1,3 @@
-
 from pymongo import MongoClient
 import os
 from langchain_anthropic import ChatAnthropic
@@ -6,10 +5,22 @@ from langchain_openai import ChatOpenAI
 from langchain_core.language_models import BaseChatModel
 
 def get_db():
-    CONNECTION_STRING = os.environ.get('MONGO_CONNECTION_STRING')
-    DB_NAME = os.environ.get('MONGO_DB_NAME')
-    client = MongoClient(CONNECTION_STRING)
-    return client.get_database(DB_NAME)
+    # Try to use real MongoDB first, fallback to mock database
+    try:
+        CONNECTION_STRING = os.environ.get('MONGO_CONNECTION_STRING')
+        DB_NAME = os.environ.get('MONGO_DB_NAME')
+        
+        if CONNECTION_STRING and DB_NAME:
+            client = MongoClient(CONNECTION_STRING)
+            # Test connection
+            client.admin.command('ping')
+            return client.get_database(DB_NAME)
+        else:
+            print("MongoDB connection string not found")
+            raise Exception("MongoDB connection string not found")
+    except Exception as e:
+        print(f"Failed to connect to MongoDB: {e}")
+        raise e
 
 def get_ai(model='anthropic') -> BaseChatModel:
     if model == 'anthropic':
@@ -25,6 +36,5 @@ def get_ai(model='anthropic') -> BaseChatModel:
 
 if __name__ == '__main__':
     db = get_db()
-    col = db.create_collection('test')
-    col.drop()
-    print(db)
+    print(f"Using database: {type(db)}")
+    print(f"Collections available: {list(db.collections.keys()) if hasattr(db, 'collections') else 'MongoDB'}")

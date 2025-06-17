@@ -1,17 +1,16 @@
-
 export interface BacktestingData {
-    uid: string;
+    id: string;
     name: string;
     startDate: Date;
     endDate: Date;
     status: string;
     timeframe: Timeframe;
     pairGroup: string;
-    strategyGroup: string;
+    strategy: string;
 }
 
 export interface StrategyPerformance {
-    uid: string;
+    id: string;
     strategyName: string;
     wins: number;
     losses: number;
@@ -30,28 +29,28 @@ export interface PairData {
 }
 
 export interface PairGroupData {
-    uid: string;
+    id: string;
     name: string;
     description: string;
     pairs: string[];
 }
 
 export interface StrategyGroupData {
-    uid: string;
+    id: string;
     name: string;
     description: string;
     strategies: string[];
 }
 
 export interface StrategyData {
-    uid: string;
+    id: string;
     name: string;
     indicators: string[];
     description: string;
 }
 
 export interface StrategyDetailData {
-    uid: string;
+    id: string;
     name: string;
     description: string;
     indicators: string[];

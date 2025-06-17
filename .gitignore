@@ -2,3 +2,4 @@
 **/db/**
 **/.env
 server/ftrade
+**/__pycache__

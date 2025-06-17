@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 import {
   BacktestingData,
   PairGroupData,
-  StrategyGroupData,
+  StrategyData,
   Timeframe,
 } from "../types/Backtesting";
 import {
   getBacktestings,
   getPairGroups,
   createBacktesting,
-  getStrategyGroups,
+  getStrategies,
 } from "../services/ApiService";
 import {
   TextField,
@@ -34,46 +34,46 @@ import { format } from "date-fns";
 
 function EditBactestingDialog({
   pairGroups,
-  strategyGroups,
+  strategies,
   onSave,
   onCancel,
 }: {
   pairGroups: PairGroupData[];
-  strategyGroups: StrategyGroupData[];
+  strategies: StrategyData[];
   onSave: (data: any) => void;
   onCancel: () => void;
 }) {
   const pairGroupOptions = pairGroups.map((item) => ({
-    uid: item.uid,
+    id: item.id,
     name: item.name,
   }));
-  const strategyGroupOptions = strategyGroups.map((item) => ({
-    uid: item.uid,
+  const strategyOptions = strategies.map((item) => ({
+    id: item.id,
     name: item.name
   }));
   const timeframeOptions = [{
-    uid: Timeframe.M1,
+    id: Timeframe.M1,
     name: "1 Minute"
   }, {
-    uid: Timeframe.M5,
+    id: Timeframe.M5,
     name: "5 Minutes"
   }, {
-    uid: Timeframe.M15,
+    id: Timeframe.M15,
     name: "15 Minutes"
   }, {
-    uid: Timeframe.M30,
+    id: Timeframe.M30,
     name: "30 Minutes"
   }, {
-    uid: Timeframe.H1,
+    id: Timeframe.H1,
     name: "1 Hour"
   }, {
-    uid: Timeframe.H4,
+    id: Timeframe.H4,
     name: "4 Hours"
   }, {
-    uid: Timeframe.H8,
+    id: Timeframe.H8,
     name: "8 Hours"
   }, {
-    uid: Timeframe.D1,
+    id: Timeframe.D1,
     name: "1 Day"
   }];
   const [backtesting, setBacktesting] = useState<BacktestingData>({
@@ -83,7 +83,7 @@ function EditBactestingDialog({
     startDate: new Date(),
     status: "pending",
     endDate: new Date(),
-    strategyGroup: "",
+    strategy: "",
     timeframe: Timeframe.M5,
   });
   const isBacktestingValid = () => {
@@ -92,7 +92,7 @@ function EditBactestingDialog({
       backtesting.pairGroup &&
       backtesting.startDate &&
       backtesting.endDate &&
-      backtesting.strategyGroup
+      backtesting.strategy
     );
   };
 
@@ -128,13 +128,13 @@ function EditBactestingDialog({
               getOptionLabel={(option) => option.name}
               value={
                 pairGroupOptions.find(
-                  (item) => item.uid === backtesting.pairGroup
+                  (item) => item.id === backtesting.pairGroup
                 ) || null
               }
               onChange={(event, newValue) => {
                 setBacktesting({
                   ...backtesting,
-                  pairGroup: newValue?.uid || "",
+                  pairGroup: newValue?.id || "",
                 });
               }}
               renderInput={(params) => (
@@ -150,13 +150,13 @@ function EditBactestingDialog({
               getOptionLabel={(option) => option.name}
               value={
                 timeframeOptions.find(
-                  (item) => item.uid === backtesting.timeframe
+                  (item) => item.id === backtesting.timeframe
                 ) || null
               }
               onChange={(event, newValue) => {
                 setBacktesting({
                   ...backtesting,
-                  timeframe: newValue?.uid || Timeframe.M5,
+                  timeframe: newValue?.id || Timeframe.M5,
                 });
               }}
               renderInput={(params) => (
@@ -168,21 +168,21 @@ function EditBactestingDialog({
               <Autocomplete 
                 size="small"
                 style={{ width: "100%" }}
-                options={strategyGroupOptions}
+                options={strategyOptions}
                 getOptionLabel={(option) => option.name}
                 value={
-                  strategyGroupOptions.find(
-                    (item) => item.uid === backtesting.strategyGroup
-                  ) || null
-                }
-                onChange={(event, newValue) => {
-                  setBacktesting({
-                    ...backtesting,
-                    strategyGroup: newValue?.uid || ''
-                  })
+                                  strategyOptions.find(
+                  (item) => item.id === backtesting.strategy
+                ) || null
+              }
+              onChange={(event, newValue) => {
+                setBacktesting({
+                  ...backtesting,
+                  strategy: newValue?.id || ''
+                })
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} label="Strategy Group" required />
+                  <TextField {...params} label="Strategy" required />
                 )}
               />
           </Grid>
@@ -253,16 +253,16 @@ function Backtesting() {
   const [selectedBacktesting, setSelectedBacktesting] =
     useState<BacktestingData | null>(null);
   const [pairGroups, setPairGroups] = useState<PairGroupData[]>([]);
-  const [strategyGroups, setStrategyGroups] = useState<StrategyGroupData[]>([])
+  const [strategies, setStrategies] = useState<StrategyData[]>([])
 
   useEffect(() => {
     getBacktestings().then((data) => setData(data));
     getPairGroups().then((data) => setPairGroups(data));
-    getStrategyGroups().then((data) => setStrategyGroups(data))
+    getStrategies().then((data) => setStrategies(data))
   }, []);
 
   const backtestingOptions = data.map((item) => ({
-    uid: item.uid,
+    id: item.id,
     name: `${item.name}`,
     status: item.status,
     timeRange: `${format(new Date(item.startDate), 'dd/MM/yy')} - ${format(new Date(item.endDate), 'dd/MM/yy')}`,
@@ -271,7 +271,7 @@ function Backtesting() {
   console.log(backtestingOptions);
 
   const pairGroupOptions = pairGroups.map((item) => ({
-    uid: item.uid,
+    id: item.id,
     name: item.name,
   }));
 
@@ -319,7 +319,7 @@ function Backtesting() {
     <div className="backtesting">
       <Dialog open={open} onClose={handleClickCloseAddBacktesting}>
         <EditBactestingDialog
-          strategyGroups={strategyGroups}
+          strategies={strategies}
           pairGroups={pairGroups}
           onCancel={handleClickCloseAddBacktesting}
           onSave={handleClickSaveBacktesting}
@@ -336,7 +336,7 @@ function Backtesting() {
               getOptionLabel={(option) => (option.name)}
               onChange={(event, newValue) => {
                 const selectedOption = data.find(
-                  (item) => item.uid === newValue?.uid
+                  (item) => item.id === newValue?.id
                 );
                 setSelectedBacktesting(selectedOption || null);
               }}
@@ -345,7 +345,7 @@ function Backtesting() {
               )}
               renderOption={(props, option) => {
                 return (<Box
-                  key={option.uid}
+                  key={option.id}
                   component="li"
                   sx={{
                     display: 'flex',
@@ -360,7 +360,7 @@ function Backtesting() {
                   <Box sx={{flexGrow: 1, marginRight: '4px'}}>
                     {option.name} ({option.timeRange})
                   </Box> &nbsp;
-                  <Chip key={option.uid} size='small' sx={{ fontSize: '0.8rem' }} variant="outlined" label={option.status} color={statusColors[option.status] as any} />
+                  <Chip key={option.id} size='small' sx={{ fontSize: '0.8rem' }} variant="outlined" label={option.status} color={statusColors[option.status] as any} />
                 </Box>)
               }}
               componentsProps={{
@@ -410,17 +410,17 @@ function Backtesting() {
           
           <Grid item xs={1.75}>
             <FormControl fullWidth>
-              <InputLabel id="strategy-group-label">Strategy Group</InputLabel>
+              <InputLabel id="strategy-label">Strategy</InputLabel>
               <Select
-                labelId="strategy-group-label"
+                labelId="strategy-label"
                 size="small"
-                label="Strategy Group"
-                value={selectedBacktesting?.strategyGroup || ""}
+                label="Strategy"
+                value={selectedBacktesting?.strategy || ""}
                 onChange={(event) => {}}
                 disabled
               >
-                {strategyGroups.map((option) => (
-                  <option key={option.uid} value={option.uid}>
+                {strategies.map((option) => (
+                  <option key={option.id} value={option.id}>
                     {option.name}
                   </option>
                 ))}
@@ -440,7 +440,7 @@ function Backtesting() {
                 disabled
               >
                 {pairGroupOptions.map((option) => (
-                  <option key={option.uid} value={option.uid}>
+                  <option key={option.id} value={option.id}>
                     {option.name}
                   </option>
                 ))}
@@ -467,7 +467,7 @@ function Backtesting() {
       </Card>
       {selectedBacktesting ? (
         <Card className="backtesting-result">
-          <StrategyPerformanceTable selectedUid={selectedBacktesting.uid} />
+          <StrategyPerformanceTable selectedId={selectedBacktesting.id} />
         </Card>
       ) : (
         <p>Please select a backtesting option.</p>

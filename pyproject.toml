@@ -1,0 +1,41 @@
+[project]
+name = "freqtrade-strategy-analysis"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Mao Bui", email = "maonguyen199873@gmail.com"},
+]
+dependencies = [
+    "freqtrade",
+    "prettytable",
+    "ipykernel",
+    "fastapi",
+    "pymongo",
+    "tqdm",
+    "flower",
+    "celery[redis]",
+    "langchain",
+    "crewai",
+    "langchain-anthropic",
+    "langchain-openai",
+    "python-dateutil",
+    "file:///${PROJECT_ROOT}/helper/ta_lib-0.5.5-cp311-cp311-win_amd64.whl",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
+
+[[tool.pdm.source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dependency-groups]
+dev = []
+
+[tool.pdm.scripts]
+_.env_file = ".env"

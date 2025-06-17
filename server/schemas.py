@@ -1,4 +1,3 @@
-
 from typing import Optional
 from pydantic import BaseModel
 
@@ -8,13 +7,13 @@ class PairGroupRequest(BaseModel):
     pairs: list[str]
 
 class PairGroupResponse(BaseModel):
-    uid: str
+    id: str
     name: str
     description: str
     pairs: list[str]
 
 class StrategyPerformance(BaseModel):
-    uid: str
+    id: str
     strategy_name: str
     wins: int
     losses: int
@@ -32,14 +31,18 @@ class BacktestingRequest(BaseModel):
     end_date: str
     timeframe: str
     pair_group_id: str
-    strategy_group_id: str
+    strategy_id: str
 
 
 class BacktestingResponse(BaseModel):
-    uid: str
+    id: str
+    name: str
+    status: str
     start_date: str
     end_date: str
-    performances: list[StrategyPerformance]
+    pair_group_id: str
+    timeframe: str
+    strategy_id: str
 
 class StrategyUpdateRequest(BaseModel):
     name: str

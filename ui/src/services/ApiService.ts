@@ -6,22 +6,22 @@ export function getBacktestings(): Promise<BacktestingData[]> {
     return fetch(`${API_ROOT}/backtestings`)
         .then(response => response.json())
         .then(response => response?.map((item: any) => ({
-            uid: item.id,
+            id: item.id,
             name: item.name,
             startDate: item.start_date,
             endDate: item.end_date,
             timeframe: item.timeframe,
-            strategyGroup: item.strategy_group_id,
+            strategy: item.strategy_id,
             pairGroup: item.pair_group_id,
             status: item.status,
         } as BacktestingData)));
 }
 
-export function getStrategyPerformance(uid: string): Promise<StrategyPerformance[]> {
-    return fetch(`${API_ROOT}/backtestings/${uid}/performances`)
+export function getStrategyPerformance(id: string): Promise<StrategyPerformance[]> {
+    return fetch(`${API_ROOT}/backtestings/${id}/performances`)
     .then(response => response.json())
     .then(response => response?.map((item: any) => ({
-        uid: item.id,
+        id: item.id,
         strategyName: item.strategy_name,
         wins: Number(item.wins.toFixed(3)),
         losses: Number(item.losses.toFixed(3)),
@@ -39,7 +39,7 @@ export function getPairGroups(): Promise<PairGroupData[]> {
     return fetch(`${API_ROOT}/pair-groups`)
         .then(response => response.json())
         .then(response => response?.map((item: any) => ({
-            uid: item.id,
+            id: item.id,
             name: item.name,
             pairs: item.pairs,
         } as PairGroupData)));
@@ -49,7 +49,7 @@ export function getStrategies(): Promise<StrategyData[]> {
     return fetch(`${API_ROOT}/strategies`)
         .then(response => response.json())
         .then(response => response?.map((item: any) => ({
-            uid: item.id,
+            id: item.id,
             name: item.name,
             description: item.description,
             indicators: item.indicators,
@@ -57,6 +57,11 @@ export function getStrategies(): Promise<StrategyData[]> {
 }
 
 export function createBacktesting(data: BacktestingData): Promise<void> {
+    // Format dates to YYYY-MM-DD string format
+    const formatDate = (date: Date): string => {
+        return date.toISOString().split('T')[0];
+    };
+
     return fetch(`${API_ROOT}/backtestings`, {
         method: 'POST',
         headers: {
@@ -64,10 +69,10 @@ export function createBacktesting(data: BacktestingData): Promise<void> {
         },
         body: JSON.stringify({
             name: data.name,
-            start_date: data.startDate,
-            end_date: data.endDate,
+            start_date: formatDate(data.startDate),
+            end_date: formatDate(data.endDate),
             timeframe: data.timeframe,
-            strategy_group_id: data.strategyGroup,
+            strategy_id: data.strategy,
             pair_group_id: data.pairGroup,
         }),
     }).then(response => response.json());   
@@ -101,7 +106,7 @@ export function getStrategyGroups(): Promise<StrategyGroupData[]> {
     return fetch(`${API_ROOT}/strategy-groups`)
         .then(response => response.json())
         .then(response => response?.map((item: any) => ({
-            uid: item.id,
+            id: item.id,
             name: item.name,
             description: item.description,
             strategies: item.strategies,
@@ -122,8 +127,8 @@ export function createStrategyGroup(data: StrategyGroupData): Promise<void> {
     }).then(response => response.json());
 }
 
-export function updateStrategyGroup(uid: string, data: StrategyGroupData): Promise<void> {
-    return fetch(`${API_ROOT}/strategy-groups/${uid}`, {
+export function updateStrategyGroup(id: string, data: StrategyGroupData): Promise<void> {
+    return fetch(`${API_ROOT}/strategy-groups/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -137,23 +142,23 @@ export function updateStrategyGroup(uid: string, data: StrategyGroupData): Promi
 }
 
 
-export function deleteStrategyGroup(uid: string): Promise<void> {
-    return fetch(`${API_ROOT}/strategy-groups/${uid}`, {
+export function deleteStrategyGroup(id: string): Promise<void> {
+    return fetch(`${API_ROOT}/strategy-groups/${id}`, {
         method: 'DELETE',
     }).then(response => response.json());
 }
 
-export function deletePairGroup(uid: string): Promise<void> {
-    return fetch(`${API_ROOT}/pair-groups/${uid}`, {
+export function deletePairGroup(id: string): Promise<void> {
+    return fetch(`${API_ROOT}/pair-groups/${id}`, {
         method: 'DELETE',
     }).then(response => response.json());
 }
 
-export function getStrategy(uid: string): Promise<StrategyDetailData> {
-    return fetch(`${API_ROOT}/strategies/${uid}`)
+export function getStrategy(id: string): Promise<StrategyDetailData> {
+    return fetch(`${API_ROOT}/strategies/${id}`)
         .then(response => response.json())
         .then(response => ({
-            uid: response.id,
+            id: response.id,
             name: response.name,
             description: response.description,
             indicators: response.indicators,
@@ -162,8 +167,8 @@ export function getStrategy(uid: string): Promise<StrategyDetailData> {
         } as StrategyDetailData));
 }
 
-export function saveStrategy(uid: string, data: StrategyDetailData): Promise<void> {
-    return fetch(`${API_ROOT}/strategies/${uid}`, {
+export function saveStrategy(id: string, data: StrategyDetailData): Promise<void> {
+    return fetch(`${API_ROOT}/strategies/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',

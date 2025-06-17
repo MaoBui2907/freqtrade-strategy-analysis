@@ -2,10 +2,10 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backtesting import router as backtesting_router
-from pairs import router as pair_groups_router
-from strategies import router as strategies_router
-from strategy_groups import router as strategy_groups_router
+from routes.backtesting import router as backtesting_router
+from routes.pairs import router as pair_groups_router
+from routes.strategies import router as strategies_router
+from routes.strategy_groups import router as strategy_groups_router
 
 app = FastAPI(
     debug=True,
