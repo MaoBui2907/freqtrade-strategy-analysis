@@ -10,7 +10,8 @@
             "cwd": "${fileDirname}",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false
         },
         {
             "name": "Python run main.py",
@@ -19,6 +20,15 @@
             "cwd": "${workspaceFolder}",
             "program": "main.py",
             "console": "internalConsole",
+            "justMyCode": false
+        },
+        {
+            "name": "Python run test.py",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/server",
+            "program": "test.py",
+            "console": "integratedTerminal",
             "justMyCode": false
         },
         {
